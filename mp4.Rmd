@@ -60,7 +60,7 @@ all_movies_long <- all_language_movies %>%
 all_countries_tvm <- db%>%
   dbGetQuery("SELECT production_year, 
 SUM(info LIKE '%US%') AS United_States, 
-SUM(info LIKE '%Guam%') AS Guam, 
+SUM(info LIKE '%Philippines%') AS Philippines, 
 SUM(info LIKE '%Mexico%') AS Mexico, 
 SUM(info LIKE '%Korea%') AS Korea
 FROM imdb.movie_info
@@ -69,28 +69,17 @@ WHERE info_type_id = 8
 AND kind_id <= '2'
 GROUP BY production_year;")
 
+###combining production years for each country for movies and tv series
+all_countries_long <- all_countries_tvm %>%
+  gather(key = "country", value = "total", United_States:Korea) %>%
+  arrange(production_year)
+
 ```
 
 ###Title for movies plot 
 ```{r message=FALSE, warning = FALSE}
-###plot for movies
+###plot for movies for each specified language
 ggplot(all_movies_long, aes(x= production_year, y = total)) +
-  geom_line(aes(color = factor(languages)), alpha = 1) +
-  xlim(1917,2017)
-```
-As seen in this data graphic, the dominating language is English, and thus movies that are in English are the most represented in the IMDb database. For us, we thought it would be especially interesting to look at the number of movies of English, Korean, Spanish, and Tagalog movies, especially since we are able to speak these languages. The way it comes down to it, comparably, there are significantly less movies in the languages other than English. Although we do acknowledge that IMDb was created by an English man, and thus would probably have IMDb's database primarily from English movies, we thought that there is still a lack of representation of these different movies in different languages, especially when looking in the last 20 years or so. 
-
-```{r message=FALSE, warning = FALSE}
-###combining production years for each language for tv series
-all_tv_long <- all_language_tv %>%
-  gather(key = "languages", value = "total", English:Korean) %>%
-  arrange(production_year)
-```
-
-###Title for tv series plot 
-```{r message=FALSE, warning = FALSE}
-###plot for tv series
-ggplot(all_tv_long, aes(x= production_year, y = total)) +
   geom_line(aes(color = factor(languages)), alpha = 1) +
   scale_x_continuous(name = "Production Year",
                    limit = c(1917, 2017)) +
@@ -98,13 +87,45 @@ ggplot(all_tv_long, aes(x= production_year, y = total)) +
   scale_color_discrete(name = "Languages")
 ```
 
+As seen in this data graphic, the dominating language is English, and thus movies that are in English are the most represented in the IMDb database. For us, we thought it would be especially interesting to look at the number of movies of English, Korean, Spanish, and Tagalog movies, especially since we are able to speak these languages. The way it comes down to it, comparably, there are significantly less movies in the languages other than English. Although we do acknowledge that IMDb was created by an English man, and thus would probably have IMDb's database primarily from English movies, we thought that there is still a lack of representation of these different movies in different languages, especially when looking in the last 20 years or so. 
+
+###combining production years for each language for tv series
+```{r message=FALSE, warning = FALSE}
+all_tv_long <- all_language_tv %>%
+  gather(key = "languages", value = "total", English:Korean) %>%
+  arrange(production_year)
+```
+
+###Title for tv series plot 
+```{r message=FALSE, warning = FALSE}
+###plot for tv series for each specified language
+ggplot(all_tv_long, aes(x= production_year, y = total)) +
+  geom_line(aes(color = factor(languages)), alpha = 1) +
+  scale_x_continuous(name = "Production Year",
+                   limit = c(1917, 2017)) +
+  scale_y_continuous(name = "Number of TV Series") +
+  scale_color_discrete(name = "Languages")
+```
+
 This idea is thus continued into the TV series. Can IMDb truly call itself "worldwide", despite the lack of other languages? 
 
+###Title for movies and tv series for countries plot 
+```{r}
+###plot for total of movies and tv series for countries
+ggplot(all_countries_long, aes(x= production_year, y = total)) +
+  geom_line(aes(color = factor(country)), alpha = 1) +
+    scale_x_continuous(name = "Production Year",
+                   limit = c(1917, 2017)) +
+  scale_y_continuous(name = "Number of Movies and TV Series") +
+  scale_color_discrete(name = "Countries")
+```
+
+###comparing the number of movies of the specified languages to all the movies in imdb
 ```{r message=FALSE, warning = FALSE}
 movies <- all_language_movies %>%
   left_join(total_entertainment, by="production_year")
-
 ```
+
 #English Movies
 ```{r message=FALSE, warning = FALSE}
 years <- filter(movies, production_year == "2017" | production_year == "2007" | production_year == "1997")
@@ -149,6 +170,8 @@ ggplot(years, aes(x = production_year, y = Tagalog/total_entertainment*100)) +
                      limits = c(0, 100), 
                      breaks = c(0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100))
 ```
+
+Danica: Because Filipino pop culture is rarely seen outside of the Philippines. It was exciting to see that there are Filipino movies included in the IMDB database. I was even more surprised that there was more than one movie was included in this database. It was also interesting that there are more movies included for 1997 than there are movies for 2007 and 2017 considering that there are differences in production qualities between the 1990s and now. However, growing up in a Filipino household, it made sense that older movies are more popular than newer movies. At home, on the Filipino channel, old movies, tv shows, and songs are always playing. To my parents and grandparents, the 1990s was the peak of Filipino pop culture. Famous Filipino singers were traveling abroad and there were many great tv series and movies made during this time. It was great that the Philippines is was not completely overshadowed in this database, but instead, IMDB included some of their best movies. In the future, it would be exciting for more newer and upcoming Filipino movies to be included in this database, especially for Filipino communities around the world.
 
 #Korean Movies
 ```{r message = FALSE, warning = FALSE}
