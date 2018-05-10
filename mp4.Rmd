@@ -55,6 +55,20 @@ GROUP BY production_year;")
 all_movies_long <- all_language_movies %>%
   gather(key = "languages", value = "total", English:Korean) %>%
   arrange(production_year)
+
+###number of tv series and movies for each specified country in imdb
+all_countries_tvm <- db%>%
+  dbGetQuery("SELECT production_year, 
+SUM(info LIKE '%US%') AS United_States, 
+SUM(info LIKE '%Guam%') AS Guam, 
+SUM(info LIKE '%Mexico%') AS Mexico, 
+SUM(info LIKE '%Korea%') AS Korea
+FROM imdb.movie_info
+JOIN title on movie_info.movie_id = title.id
+WHERE info_type_id = 8
+AND kind_id <= '2'
+GROUP BY production_year;")
+
 ```
 
 ###Title for movies plot 
