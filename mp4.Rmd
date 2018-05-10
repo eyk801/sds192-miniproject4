@@ -1,0 +1,106 @@
+---
+title: "Behind the Scenes of IMDb"
+author: "Danica Miguel, Lizette Carpenter, and Emily Kim"
+date: "May 1, 2018"
+output: 
+  html_document:
+    code_folding: hide
+---
+
+```{r message = FALSE, include = FALSE, warning = FALSE}
+library(mdsr)
+library(RMySQL)
+library(ggplot2)
+db <- dbConnect_scidb(dbname = "imdb")
+```
+
+```{r message=FALSE, warning = FALSE}
+class(db)
+```
+
+###total number of movies in imdb
+```{r message=FALSE, warning = FALSE}
+total_entertainment <- db %>% 
+  dbGetQuery("SELECT production_year, COUNT(*) as total_entertainment
+FROM imdb.title
+WHERE kind_id = 1
+GROUP BY production_year
+ORDER BY production_year DESC;")
+```
+
+###number of movies for each specified language in imdb
+```{r message=FALSE, warning = FALSE}
+all_language_movies <- db%>%
+  dbGetQuery("SELECT production_year, SUM(info LIKE '%English%') AS English, SUM(info LIKE '%Tagalog%') AS Tagalog, SUM(info LIKE '%Spanish%') AS Spanish, SUM(info LIKE '%Korean%') as Korean 
+FROM imdb.movie_info
+JOIN title on movie_info.movie_id = title.id
+WHERE info_type_id = 4
+AND kind_id = 1
+GROUP BY production_year;")
+```
+
+###number of tv series for each specified language in imdb
+```{r message=FALSE, warning = FALSE}
+all_language_tv <- db%>%
+  dbGetQuery("SELECT production_year, SUM(info LIKE '%English%') AS English, SUM(info LIKE '%Tagalog%') AS Tagalog, SUM(info LIKE '%Spanish%') AS Spanish, SUM(info LIKE '%Korean%') as Korean 
+FROM imdb.movie_info
+JOIN title on movie_info.movie_id = title.id
+WHERE info_type_id = 4
+AND kind_id = 2
+GROUP BY production_year;")
+```
+
+###combining production years for each language for movies
+```{r message=FALSE, warning = FALSE}
+all_movies_long <- all_language_movies %>%
+  gather(key = "languages", value = "total", English:Korean) %>%
+  arrange(production_year)
+```
+
+###plot for movies
+```{r message=FALSE, warning = FALSE}
+ggplot(all_movies_long, aes(x= production_year, y = total)) +
+  geom_line(aes(color = factor(languages)), alpha = 1) +
+  xlim(1917,2017)
+```
+
+###combining production years for each language for tv series
+```{r message=FALSE, warning = FALSE}
+all_tv_long <- all_language_tv %>%
+  gather(key = "languages", value = "total", English:Korean) %>%
+  arrange(production_year)
+```
+
+###plot for tv series
+```{r message=FALSE, warning = FALSE}
+ggplot(all_tv_long, aes(x= production_year, y = total)) +
+  geom_line(aes(color = factor(languages)), alpha = 1) +
+  xlim(1917,2017)
+```
+
+```{r message=FALSE, warning = FALSE}
+movies <- all_language_movies %>%
+  left_join(total_entertainment, by="production_year")
+
+```
+
+```{r message=FALSE, warning = FALSE}
+years <- filter(movies, production_year == "2017" | production_year == "2007" | production_year == "1997")
+
+ggplot(years, aes(x = production_year, y = English/total_entertainment*100)) +
+  geom_bar(stat = "identity") +
+  ggtitle("English speaking movies in IMDB") 
+
+ggplot(years, aes(x = production_year, y = Spanish/total_entertainment*100)) +
+  geom_bar(stat = "identity") +
+  ggtitle("Spanish speaking movies in IMDB")
+
+ggplot(years, aes(x = production_year, y = Tagalog/total_entertainment*100)) +
+  geom_bar(stat = "identity") +
+  ggtitle("Tagalog speaking movies in IMDB")
+
+ggplot(years, aes(x = production_year, y = Korean/total_entertainment*100)) +
+  geom_bar(stat = "identity") +
+  ggtitle("Korean speaking movies in IMDB")
+
+```
