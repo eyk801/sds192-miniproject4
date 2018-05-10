@@ -17,7 +17,8 @@ db <- dbConnect_scidb(dbname = "imdb")
 ```{r message=FALSE, warning = FALSE}
 class(db)
 ```
-
+**Problem Statement:**
+When googling [imdb](https://www.google.com/search?q=imdb&rlz=1C5CHFA_enUS721US721&oq=IMDB&aqs=chrome.0.0j69i60j69i59j69i60l3.2432j1j7&sourceid=chrome&ie=UTF-8), the first result is the IMDb’s [website](https://www.imdb.com/pressroom/about/?pf_rd_m=A2FGELUUNOQJNL&pf_rd_p=c1695c53-c70f-429d-859f-647489ac83de&pf_rd_r=F9J4ZH0MYVAVCFF2GPJ9&pf_rd_s=right-1&pf_rd_t=60601&pf_rd_i=pressroom&ref_=fea_pr_pr_lk2) where it briefly explains, “IMDb, the world's most popular and authoritative source for movie, TV and celebrity content.” In our investigation, we want to look at the question "to what extent is IMDb truly worldwide?", and to answer this question, we will be looking at different languages. Each member of our group is bilingual and shares the ability of enjoying movies and TV series produced in languages other than English. Thus, our interest is to see how the representation of movies and TV series produced in non-English languages has changed over the last 100 years in IMDb’s database.  
 ###total number of movies in imdb
 ```{r message=FALSE, warning = FALSE}
 total_entertainment <- db %>% 
@@ -63,7 +64,7 @@ ggplot(all_movies_long, aes(x= production_year, y = total)) +
   geom_line(aes(color = factor(languages)), alpha = 1) +
   xlim(1917,2017)
 ```
-
+As seen in this data graphic, the dominating language is English, and thus movies that are in English are the most represented in the IMDb database. For us, we thought it would be especially interesting to look at the number of movies of English, Korean, Spanish, and Tagalog movies, especially since we are able to speak these languages. The way it comes down to it, comparably, there are significantly less movies in the languages other than English. Although we do acknowledge that IMDb was created by an English man, and thus would probably have IMDb's database primarily from English movies, we thought that there is still a lack of representation of these different movies in different languages, especially when looking in the last 20 years or so. 
 ###combining production years for each language for tv series
 ```{r message=FALSE, warning = FALSE}
 all_tv_long <- all_language_tv %>%
@@ -77,7 +78,7 @@ ggplot(all_tv_long, aes(x= production_year, y = total)) +
   geom_line(aes(color = factor(languages)), alpha = 1) +
   xlim(1917,2017)
 ```
-
+This idea is thus continued into the TV series. Can IMDb truly call itself "worldwide", despite the lack of other languages? 
 ```{r message=FALSE, warning = FALSE}
 movies <- all_language_movies %>%
   left_join(total_entertainment, by="production_year")
