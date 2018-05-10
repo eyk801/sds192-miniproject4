@@ -12,6 +12,7 @@ output:
 library(mdsr)
 library(RMySQL)
 library(ggplot2)
+library(scales)
 db <- dbConnect_scidb(dbname = "imdb")
 ```
 
@@ -77,7 +78,10 @@ all_tv_long <- all_language_tv %>%
 ###plot for tv series
 ggplot(all_tv_long, aes(x= production_year, y = total)) +
   geom_line(aes(color = factor(languages)), alpha = 1) +
-  xlim(1917,2017)
+  scale_x_continuous(name = "Production Year",
+                   limit = c(1917, 2017)) +
+  scale_y_continuous(name = "Number of Movies") +
+  scale_color_discrete(name = "Languages")
 ```
 
 This idea is thus continued into the TV series. Can IMDb truly call itself "worldwide", despite the lack of other languages? 
@@ -87,24 +91,64 @@ movies <- all_language_movies %>%
   left_join(total_entertainment, by="production_year")
 
 ```
-
+#English Movies
 ```{r message=FALSE, warning = FALSE}
 years <- filter(movies, production_year == "2017" | production_year == "2007" | production_year == "1997")
 
 ggplot(years, aes(x = production_year, y = English/total_entertainment*100)) +
-  geom_bar(stat = "identity") +
-  ggtitle("English speaking movies in IMDB") 
+  geom_bar(stat = "identity",
+           fill = "red1") +
+  ggtitle("English Speaking Movies in IMDb")  +
+  scale_x_continuous(name = "Production Year", 
+                     breaks = c(1997, 2007, 2017, 10)) +
+  scale_y_continuous(name = "% of English Movies in IMDb Database", 
+                     limits = c(0, 100), 
+                     breaks = c(0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100))
+```
+
+#Spanish Movies
+```{r message = FALSE, warning = FALSE}
+years <- filter(movies, production_year == "2017" | production_year == "2007" | production_year == "1997")
 
 ggplot(years, aes(x = production_year, y = Spanish/total_entertainment*100)) +
-  geom_bar(stat = "identity") +
-  ggtitle("Spanish speaking movies in IMDB")
+  geom_bar(stat = "identity",
+           fill = "turquoise1") +
+  ggtitle("Spanish Speaking Movies in IMDb") +
+  scale_x_continuous(name = "Production Year", 
+                     breaks = c(1997, 2007, 2017, 10)) +
+  scale_y_continuous(name = "% of Spanish Movies in IMDb Database", 
+                     limits = c(0, 100), 
+                     breaks = c(0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100))
+```
+
+#Tagalog Movies
+```{r message = FALSE, warning = FALSE}
+years <- filter(movies, production_year == "2017" | production_year == "2007" | production_year == "1997")
 
 ggplot(years, aes(x = production_year, y = Tagalog/total_entertainment*100)) +
-  geom_bar(stat = "identity") +
-  ggtitle("Tagalog speaking movies in IMDB")
+  geom_bar(stat = "identity",
+           fill = "darkorchid4") +
+  ggtitle("Tagalog Speaking Movies in IMDb") +
+  scale_x_continuous(name = "Production Year", 
+                     breaks = c(1997, 2007, 2017, 10)) +
+  scale_y_continuous(name = "% of Tagalog Movies in IMDb Database", 
+                     limits = c(0, 100), 
+                     breaks = c(0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100))
+```
+
+#Korean Movies
+```{r message = FALSE, warning = FALSE}
+years <- filter(movies, production_year == "2017" | production_year == "2007" | production_year == "1997")
 
 ggplot(years, aes(x = production_year, y = Korean/total_entertainment*100)) +
-  geom_bar(stat = "identity") +
-  ggtitle("Korean speaking movies in IMDB")
+  geom_bar(stat = "identity",
+           fill = "olivedrab4") +
+  ggtitle("Korean Speaking Movies in IMDb") +
+  scale_x_continuous(name = "Production Year", 
+                     breaks = c(1997, 2007, 2017, 10)) +
+  scale_y_continuous(name = "% of Korean Movies in IMDb Database", 
+                     limits = c(0, 100), 
+                     breaks = c(0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100))
 
 ```
+
